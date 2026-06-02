@@ -15,5 +15,18 @@ export const IngredientDetails: FC = () => {
     return <Preloader />;
   }
 
-  return <IngredientDetailsUI ingredientData={ingredientData} />;
+  return (
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '100%',
+        paddingTop: '40px'
+      }}
+    >
+      <IngredientDetailsUI ingredientData={ingredientData} />
+    </div>
+  );
 };

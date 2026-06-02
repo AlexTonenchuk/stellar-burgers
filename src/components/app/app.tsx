@@ -1,5 +1,11 @@
 import { useEffect } from 'react';
-import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
+import {
+  Routes,
+  Route,
+  useLocation,
+  useNavigate,
+  useMatch
+} from 'react-router-dom';
 
 import { useDispatch, useSelector } from '../../services/store';
 import { fetchIngredients } from '../../services/slices/ingredientsSlice';
@@ -29,6 +35,12 @@ const App = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
+  const feedMatch = useMatch('/feed/:number');
+  const profileOrderMatch = useMatch('/profile/orders/:number');
+
+  const orderNumber =
+    feedMatch?.params.number || profileOrderMatch?.params.number;
 
   const {
     ingredients,
@@ -132,7 +144,7 @@ const App = () => {
               <Route
                 path='/feed/:number'
                 element={
-                  <Modal title='Информация о заказе' onClose={closeModal}>
+                  <Modal title={`#${orderNumber}`} onClose={closeModal}>
                     <OrderInfo />
                   </Modal>
                 }
@@ -148,7 +160,7 @@ const App = () => {
               <Route
                 path='/profile/orders/:number'
                 element={
-                  <Modal title='Информация о заказе' onClose={closeModal}>
+                  <Modal title={`#${orderNumber}`} onClose={closeModal}>
                     <OrderInfo />
                   </Modal>
                 }

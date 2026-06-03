@@ -16,7 +16,7 @@ export const fetchUserOrders = createAsyncThunk(
 );
 
 interface OrderState {
-  orderModalData: any | null;
+  orderModalData: TOrder | null;
   orderRequest: boolean;
   error: string | null;
   userOrders: TOrder[];
@@ -45,7 +45,7 @@ const orderSlice = createSlice({
       })
       .addCase(orderBurger.fulfilled, (state, action) => {
         state.orderRequest = false;
-        state.orderModalData = action.payload;
+        state.orderModalData = action.payload as unknown as TOrder;
       })
       .addCase(orderBurger.rejected, (state, action) => {
         state.orderRequest = false;

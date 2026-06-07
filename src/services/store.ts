@@ -13,7 +13,7 @@ import {
 import { combineReducers } from '@reduxjs/toolkit';
 import userReducer from './slices/userSlice';
 
-const rootReducer = combineReducers({
+export const rootReducer = combineReducers({
   ingredients: ingredientsReducer,
   user: userReducer,
   burgerConstructor: constructorSlice,

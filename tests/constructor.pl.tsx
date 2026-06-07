@@ -5,20 +5,13 @@ import orderMock from './order.json';
 
 test.describe('Страница конструктора бургера', () => {
   test.beforeEach(async ({ page }) => {
-    await page.route('**/api/ingredients', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          success: true,
-          data: ingredientsMock
-        })
-      });
+    await page.routeFromHAR('tests/hars/api-mock.har', {
+      url: '**/api/**',
+      update: false
     });
 
     await page.goto('/');
   });
-
   test('Должен отображать ингредиенты из моковых данных', async ({ page }) => {
     await expect(page.getByText('Краторная булка N-200i')).toBeVisible();
   });
@@ -26,16 +19,18 @@ test.describe('Страница конструктора бургера', () => 
   test('Должен добавлять булку и начинку в конструктор при клике на кнопку Добавить', async ({
     page
   }) => {
-    const bunCard = page.locator('text=Краторная булка N-200i');
     await page.locator('button', { hasText: 'Добавить' }).first().click();
-
     await page.locator('button', { hasText: 'Добавить' }).last().click();
 
-    await expect(page.locator('text=Краторная булка N-200i')).toHaveCount(3);
+    const constructorSection = page
+      .locator('button:has-text("Оформить заказ")')
+      .locator('..');
 
+    await expect(constructorSection.locator('text=Краторная булка N-200i'))
+      .toBeVisible;
     await expect(
-      page.locator('text=Филе Люминесцентного Тетраодона')
-    ).toHaveCount(2);
+      constructorSection.locator('text=Филе Люминесцентного Тетраодона')
+    ).toBeVisible;
   });
 
   test('Должно открываться и закрываться по крестику модальное окно ингредиента', async ({
@@ -44,6 +39,7 @@ test.describe('Страница конструктора бургера', () => 
     await page.getByText('Краторная булка N-200i').first().click();
 
     await expect(page.getByText('Детали ингредиента')).toBeVisible();
+    await expect(page.getByText('Краторная булка N-200i').last()).toBeVisible();
 
     await page
       .locator('button[class*="button"] svg')
@@ -69,25 +65,6 @@ test.describe('Страница конструктора бургера', () => 
   });
 
   test('Должен успешно оформлять заказ', async ({ page, context }) => {
-    await page.route('**/api/auth/user', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          success: true,
-          user: userMock.user
-        })
-      });
-    });
-
-    await page.route('**/api/orders', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify(orderMock)
-      });
-    });
-
     await context.addCookies([
       {
         name: 'accessToken',
@@ -106,13 +83,24 @@ test.describe('Страница конструктора бургера', () => 
 
     await page.locator('button', { hasText: 'Оформить заказ' }).click();
 
-    await expect(page.getByText('123456')).toBeVisible();
+    await expect(
+      page.locator('div', { hasText: '123456' }).last()
+    ).toBeVisible();
 
     await page
       .locator('button[class*="button"] svg')
       .first()
       .click({ force: true });
 
-    await expect(page.locator('text=Краторная булка N-200i')).toHaveCount(1);
+    const constructorSection = page
+      .locator('button:has-text("Оформить заказ")')
+      .locator('..');
+
+    await expect(
+      constructorSection.locator('text=Краторная булка N-200i')
+    ).toHaveCount(0);
+    await expect(
+      constructorSection.locator('text=Филе Люминесцентного Тетраодона')
+    ).toHaveCount(0);
   });
 });

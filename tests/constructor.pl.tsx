@@ -1,7 +1,4 @@
 import { test, expect } from '@playwright/test';
-import ingredientsMock from './ingredients.json';
-import userMock from './user.json';
-import orderMock from './order.json';
 
 test.describe('Страница конструктора бургера', () => {
   test.beforeEach(async ({ page }) => {

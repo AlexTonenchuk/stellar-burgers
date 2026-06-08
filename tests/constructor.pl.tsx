@@ -16,18 +16,27 @@ test.describe('Страница конструктора бургера', () => 
   test('Должен добавлять булку и начинку в конструктор при клике на кнопку Добавить', async ({
     page
   }) => {
-    await page.locator('button', { hasText: 'Добавить' }).first().click();
-    await page.locator('button', { hasText: 'Добавить' }).last().click();
+    await page
+      .locator('li', { hasText: 'Краторная булка N-200i' })
+      .getByRole('button', { name: 'Добавить' })
+      .click();
+
+    await page
+      .locator('li', { hasText: 'Биокотлета из марсианской Магнолии' })
+      .getByRole('button', { name: 'Добавить' })
+      .click();
 
     const constructorSection = page
-      .locator('button:has-text("Оформить заказ")')
-      .locator('..');
+      .locator('section')
+      .filter({ hasText: 'Оформить заказ' });
 
-    await expect(constructorSection.locator('text=Краторная булка N-200i'))
-      .toBeVisible;
     await expect(
-      constructorSection.locator('text=Филе Люминесцентного Тетраодона')
-    ).toBeVisible;
+      constructorSection.getByText('Краторная булка N-200i (верх)')
+    ).toBeVisible();
+
+    await expect(
+      constructorSection.getByText('Биокотлета из марсианской Магнолии')
+    ).toBeVisible();
   });
 
   test('Должно открываться и закрываться по крестику модальное окно ингредиента', async ({
@@ -35,13 +44,14 @@ test.describe('Страница конструктора бургера', () => 
   }) => {
     await page.getByText('Краторная булка N-200i').first().click();
 
-    await expect(page.getByText('Детали ингредиента')).toBeVisible();
-    await expect(page.getByText('Краторная булка N-200i').last()).toBeVisible();
+    const modalContainer = page.locator('#modals');
 
-    await page
-      .locator('button[class*="button"] svg')
-      .first()
-      .click({ force: true });
+    await expect(modalContainer.getByText('Детали ингредиента')).toBeVisible();
+    await expect(
+      modalContainer.getByText('Краторная булка N-200i')
+    ).toBeVisible();
+
+    await modalContainer.getByRole('button').click({ force: true });
 
     await expect(page.getByText('Детали ингредиента')).not.toBeVisible();
   });
@@ -80,24 +90,20 @@ test.describe('Страница конструктора бургера', () => 
 
     await page.locator('button', { hasText: 'Оформить заказ' }).click();
 
-    await expect(
-      page.locator('div', { hasText: '123456' }).last()
-    ).toBeVisible();
+    const modalContainer = page.locator('#modals');
+    await expect(modalContainer.getByText('123456')).toBeVisible();
 
-    await page
-      .locator('button[class*="button"] svg')
-      .first()
-      .click({ force: true });
+    await modalContainer.getByRole('button').click({ force: true });
 
     const constructorSection = page
-      .locator('button:has-text("Оформить заказ")')
-      .locator('..');
+      .locator('section')
+      .filter({ hasText: 'Оформить заказ' });
 
     await expect(
-      constructorSection.locator('text=Краторная булка N-200i')
-    ).toHaveCount(0);
+      constructorSection.getByText('Выберите булки').first()
+    ).toBeVisible();
     await expect(
-      constructorSection.locator('text=Филе Люминесцентного Тетраодона')
-    ).toHaveCount(0);
+      constructorSection.getByText('Выберите начинку')
+    ).toBeVisible();
   });
 });
